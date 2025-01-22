@@ -19,7 +19,7 @@ var (
 	cpfRegex   = regexp.MustCompile(`^[0-9]{3}[\.]?[0-9]{3}[\.]?[0-9]{3}[-]?[0-9]{2}$`)
 	emailRegex = regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
 
-	ErrInvalidPixKey = errors.New("invalid pix key")
+	ErrInvalidPixType = errors.New("invalid pix type")
 )
 
 func IsEmailValid(e string) bool {
@@ -201,7 +201,7 @@ func PixKeyType(pixkey string) ([]string, error) {
 	}
 
 	if len(ret) == 0 {
-		return nil, ErrInvalidPixKey
+		return nil, ErrInvalidPixType
 	}
 
 	return ret, nil
