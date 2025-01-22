@@ -16,6 +16,8 @@ var (
 
 	cnpjRegex = regexp.MustCompile(
 		`^[0-9]{2}[\.]?[0-9]{3}[\.]?[0-9]{3}[\/]?[0-9]{4}[-]?[0-9]{2}$`)
+	cnpjAlphaRegex = regexp.MustCompile(
+		`^[0-9A-Z]{2}\.?[0-9A-Z]{3}\.?[0-9A-Z]{3}/?[0-9A-Z]{4}-?[0-9]{2}$`)
 	cpfRegex   = regexp.MustCompile(`^[0-9]{3}[\.]?[0-9]{3}[\.]?[0-9]{3}[-]?[0-9]{2}$`)
 	emailRegex = regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
 
@@ -29,6 +31,10 @@ func IsEmailValid(e string) bool {
 
 func IsCNPJ(e string) bool {
 	return cnpjRegex.MatchString(e)
+}
+
+func IsCNPJAlpha(e string) bool {
+	return cnpjAlphaRegex.MatchString(strings.ToUpper(e))
 }
 
 func IsCPF(e string) bool {
@@ -45,10 +51,34 @@ func RemoveNonDigits(s string) string {
 	return r
 }
 
+func RemoveNonAlphaNum(s string) string {
+	var b strings.Builder
+	for _, r := range s {
+		upper := unicode.ToUpper(r)
+		if (upper >= '0' && upper <= '9') || (upper >= 'A' && upper <= 'Z') {
+			b.WriteRune(upper)
+		}
+	}
+	return b.String()
+}
+
 func IsRepetitive(s string) bool {
 	c := s[0]
 	for _, v := range []byte(s) {
 		if c != v {
+			return false
+		}
+	}
+	return true
+}
+
+func isRepetitiveAlpha(s string) bool {
+	if len(s) == 0 {
+		return false
+	}
+	first := s[0]
+	for i := 1; i < len(s); i++ {
+		if s[i] != first {
 			return false
 		}
 	}
@@ -65,6 +95,30 @@ func sum(s string, table []int) int {
 	}
 
 	return r
+}
+
+func getAlphanumericValue(r rune) (int, error) {
+	r = unicode.ToUpper(r)
+	switch {
+	case r >= '0' && r <= '9':
+		return int(r) - 48, nil
+	case r >= 'A' && r <= 'Z':
+		return int(r) - 48, nil
+	default:
+		return 0, errors.New("caractere inválido")
+	}
+}
+
+func sumAlpha(s string, table []int) int {
+	total := 0
+	for i, v := range table {
+		val, err := getAlphanumericValue(rune(s[i]))
+		if err != nil {
+			return -1 // indica erro
+		}
+		total += val * v
+	}
+	return total
 }
 
 func CPF(cpf string) bool {
@@ -137,6 +191,54 @@ func CNPJ(cnpj string) bool {
 	p2aux := int(p2[1] - '0')
 
 	return byte(d1) == byte(p1aux) && byte(d2) == byte(p2aux)
+}
+
+// CNPJAlphanumeric is a experimental function to validate CNPJ with alphanumeric characters use with caution.
+func CNPJAlphanumeric(cnpj string) bool {
+	cnpj = RemoveNonAlphaNum(cnpj)
+	if len(cnpj) != 14 {
+		return false
+	}
+
+	for i := 12; i < 14; i++ {
+		if cnpj[i] < '0' || cnpj[i] > '9' {
+			return false
+		}
+	}
+
+	if isRepetitiveAlpha(cnpj) {
+		return false
+	}
+
+	p1 := cnpj[:12]
+	p2 := cnpj[12:]
+
+	s := sumAlpha(p1, cnpjP1)
+	if s < 0 {
+		return false
+	}
+	r1 := s % 11
+	d1 := 0
+	if r1 >= 2 {
+		d1 = 11 - r1
+	}
+
+	p1ComDV := p1 + strconv.Itoa(d1)
+
+	s2 := sumAlpha(p1ComDV, cnpjP2)
+	if s2 < 0 {
+		return false
+	}
+	r2 := s2 % 11
+	d2 := 0
+	if r2 >= 2 {
+		d2 = 11 - r2
+	}
+
+	dv1, _ := strconv.Atoi(string(p2[0]))
+	dv2, _ := strconv.Atoi(string(p2[1]))
+
+	return d1 == dv1 && d2 == dv2
 }
 
 func PhoneWithBrazilianAreaCode(phone string) bool { // DDD
