@@ -43,22 +43,21 @@ func IsCPF(e string) bool {
 }
 
 func RemoveNonDigits(s string) string {
-	var r string
+	var b strings.Builder
 	for _, c := range s {
 		if unicode.IsDigit(c) {
-			r += string(c)
+			b.WriteRune(c)
 		}
 	}
-	return r
+	return b.String()
 }
 
 func RemoveNonAlphaNum(s string) string {
 	var b strings.Builder
-	for _, r := range s {
-		upper := unicode.ToUpper(r)
-		if (upper >= '0' && upper <= '9') ||
-			(upper >= 'A' && upper <= 'Z') {
-			b.WriteRune(upper)
+	for _, c := range s {
+		if unicode.IsDigit(c) ||
+			unicode.IsLetter(c) {
+			b.WriteRune(c)
 		}
 	}
 	return b.String()
@@ -101,13 +100,11 @@ func sum(s string, table []int) int {
 
 func getAlphanumericValue(r rune) (int, error) {
 	r = unicode.ToUpper(r)
-	switch {
-	case (r >= '0' && r <= '9') ||
-		(r >= 'A' && r <= 'Z'):
+	if unicode.IsDigit(r) ||
+		unicode.IsLetter(r) {
 		return int(r) - 48, nil
-	default:
-		return 0, ErrInvalidCharacter
 	}
+	return 0, ErrInvalidCharacter
 }
 
 func sumAlpha(s string, table []int) int {
