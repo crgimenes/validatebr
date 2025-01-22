@@ -253,16 +253,14 @@ func PhoneWithBrazilianAreaCode(phone string) bool { // DDD
 		return false
 	}
 
-	invalidDDD := []string{
-		"00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10",
-		"20", "23", "25", "26", "29", "30", "36", "39", "40", "50", "52",
-		"56", "57", "58", "59", "60", "70", "72", "76", "78", "80", "90",
+	var invalidDDD = map[string]bool{
+		"00": true, "01": true, "02": true, "03": true, "04": true, "05": true, "06": true, "07": true, "08": true, "09": true, "10": true,
+		"20": true, "23": true, "25": true, "26": true, "29": true, "30": true, "36": true, "39": true, "40": true, "50": true, "52": true,
+		"56": true, "57": true, "58": true, "59": true, "60": true, "70": true, "72": true, "76": true, "78": true, "80": true, "90": true,
 	}
 
-	for _, v := range invalidDDD {
-		if v == phone[:2] {
-			return false
-		}
+	if invalidDDD[phone[:2]] {
+		return false
 	}
 
 	return true
