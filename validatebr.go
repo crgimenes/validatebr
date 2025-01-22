@@ -21,7 +21,8 @@ var (
 	cpfRegex   = regexp.MustCompile(`^[0-9]{3}[\.]?[0-9]{3}[\.]?[0-9]{3}[-]?[0-9]{2}$`)
 	emailRegex = regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
 
-	ErrInvalidPixType = errors.New("invalid pix type")
+	ErrInvalidPixType   = errors.New("invalid pix type")
+	ErrInvalidCharacter = errors.New("invalid character")
 )
 
 func IsEmailValid(e string) bool {
@@ -55,7 +56,8 @@ func RemoveNonAlphaNum(s string) string {
 	var b strings.Builder
 	for _, r := range s {
 		upper := unicode.ToUpper(r)
-		if (upper >= '0' && upper <= '9') || (upper >= 'A' && upper <= 'Z') {
+		if (upper >= '0' && upper <= '9') ||
+			(upper >= 'A' && upper <= 'Z') {
 			b.WriteRune(upper)
 		}
 	}
@@ -100,12 +102,11 @@ func sum(s string, table []int) int {
 func getAlphanumericValue(r rune) (int, error) {
 	r = unicode.ToUpper(r)
 	switch {
-	case r >= '0' && r <= '9':
-		return int(r) - 48, nil
-	case r >= 'A' && r <= 'Z':
+	case (r >= '0' && r <= '9') ||
+		(r >= 'A' && r <= 'Z'):
 		return int(r) - 48, nil
 	default:
-		return 0, errors.New("caractere inválido")
+		return 0, ErrInvalidCharacter
 	}
 }
 
