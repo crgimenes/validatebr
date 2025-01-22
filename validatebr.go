@@ -176,10 +176,10 @@ func PixKeyType(pixkey string) ([]string, error) {
 	if IsEmailValid(pixkey) {
 		types["EMAIL"] = true
 	}
-	if IsCNPJ(pixkey) && CNPJ(pixkey) { // valida regex e digito verificador
+	if IsCNPJ(pixkey) && CNPJ(pixkey) {
 		types["CNPJ"] = true
 	}
-	if IsCPF(pixkey) && CPF(pixkey) { // valida regex e digito verificador
+	if IsCPF(pixkey) && CPF(pixkey) {
 		types["CPF"] = true
 	}
 	if len(pixkey) == 36 {
