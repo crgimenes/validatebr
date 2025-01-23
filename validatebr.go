@@ -3,6 +3,7 @@ package validatebr
 import (
 	"errors"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"unicode"
@@ -64,22 +65,12 @@ func RemoveNonAlphaNum(s string) string {
 }
 
 func IsRepetitive(s string) bool {
-	c := s[0]
-	for _, v := range []byte(s) {
-		if c != v {
-			return false
-		}
-	}
-	return true
-}
-
-func isRepetitiveAlpha(s string) bool {
 	if len(s) == 0 {
 		return false
 	}
-	first := s[0]
-	for i := 1; i < len(s); i++ {
-		if s[i] != first {
+	c := s[0]
+	for _, v := range []byte(s) {
+		if c != v {
 			return false
 		}
 	}
@@ -107,16 +98,16 @@ func getAlphanumericValue(r rune) (int, error) {
 	return 0, ErrInvalidCharacter
 }
 
-func sumAlpha(s string, table []int) int {
+func sumAlpha(s string, table []int) (int, error) {
 	total := 0
 	for i, v := range table {
 		val, err := getAlphanumericValue(rune(s[i]))
 		if err != nil {
-			return -1 // indica erro
+			return -1, err
 		}
 		total += val * v
 	}
-	return total
+	return total, nil
 }
 
 func CPF(cpf string) bool {
@@ -198,20 +189,23 @@ func CNPJAlphanumeric(cnpj string) bool {
 		return false
 	}
 
+	if IsRepetitive(cnpj) {
+		return false
+	}
+
 	for i := 12; i < 14; i++ {
 		if cnpj[i] < '0' || cnpj[i] > '9' {
 			return false
 		}
 	}
 
-	if isRepetitiveAlpha(cnpj) {
-		return false
-	}
-
 	p1 := cnpj[:12]
 	p2 := cnpj[12:]
 
-	s := sumAlpha(p1, cnpjP1)
+	s, err := sumAlpha(p1, cnpjP1)
+	if err != nil {
+		return false
+	}
 	if s < 0 {
 		return false
 	}
@@ -223,7 +217,10 @@ func CNPJAlphanumeric(cnpj string) bool {
 
 	p1ComDV := p1 + strconv.Itoa(d1)
 
-	s2 := sumAlpha(p1ComDV, cnpjP2)
+	s2, err := sumAlpha(p1ComDV, cnpjP2)
+	if err != nil {
+		return false
+	}
 	if s2 < 0 {
 		return false
 	}
@@ -303,6 +300,8 @@ func PixKeyType(pixkey string) ([]string, error) {
 	if len(ret) == 0 {
 		return nil, ErrInvalidPixType
 	}
+
+	slices.Sort(ret)
 
 	return ret, nil
 }
