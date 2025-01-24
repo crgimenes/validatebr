@@ -6,7 +6,7 @@ import (
 	"github.com/crgimenes/validatebr"
 )
 
-func BenchmarkPhoneWithBrazilianAreaCode(b *testing.B) {
+func BenchmarkPhoneWithBrazilianAreaCodeWithMap(b *testing.B) {
 	phones := []string{
 		"11987654321",   // valid
 		"5511987654321", // valid with country code
@@ -24,7 +24,7 @@ func BenchmarkPhoneWithBrazilianAreaCode(b *testing.B) {
 	}
 }
 
-func BenchmarkPhoneWithBrazilianAreaCodeMap(b *testing.B) {
+func BenchmarkPhoneWithBrazilianAreaCodeWithArray(b *testing.B) {
 	phones := []string{
 		"11987654321",   // valid
 		"5511987654321", // valid with country code
