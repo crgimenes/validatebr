@@ -20,8 +20,9 @@ func PhoneWithBrazilianAreaCodeArray(phone string) bool { // DDD
 		"56", "57", "58", "59", "60", "70", "72", "76", "78", "80", "90",
 	}
 
+	ddd := phone[:2]
 	for _, v := range invalidDDD {
-		if v == phone[:2] {
+		if v == ddd {
 			return false
 		}
 	}
