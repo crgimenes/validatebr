@@ -1,3 +1,3 @@
 module github.com/crgimenes/validatebr
 
-go 1.27
+go 1.27.1
