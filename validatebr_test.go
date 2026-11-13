@@ -280,6 +280,11 @@ func TestCNPJAlphanumeric(t *testing.T) {
 			expected: false,
 		},
 		{
+			name:     "Non-ASCII letter whose UTF-8 bytes add up to valid DVs",
+			input:    "ª345678000130",
+			expected: false,
+		},
+		{
 			name:     "Empty string",
 			input:    "",
 			expected: false,
@@ -582,6 +587,18 @@ func TestPixKeyType(t *testing.T) {
 			input:     "12.345.678/0001-95",
 			expectErr: nil,
 			wantTypes: []string{"CNPJ"},
+		},
+		{
+			name:      "Valid alphanumeric CNPJ",
+			input:     "12ABC34501DE35",
+			expectErr: nil,
+			wantTypes: []string{"CNPJ"},
+		},
+		{
+			name:      "Alphanumeric CNPJ with wrong check digits",
+			input:     "12ABC34501DE36",
+			expectErr: validatebr.ErrInvalidPixType,
+			wantTypes: nil,
 		},
 		{
 			name:      "Valid CPF",

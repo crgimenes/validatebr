@@ -89,10 +89,10 @@ func sum(s string, table []int) int {
 	return r
 }
 
+// IN RFB 2.229/2024: only 0-9 and A-Z, each worth its ASCII code minus 48.
 func getAlphanumericValue(r rune) (int, error) {
 	r = unicode.ToUpper(r)
-	if unicode.IsDigit(r) ||
-		unicode.IsLetter(r) {
+	if ('0' <= r && r <= '9') || ('A' <= r && r <= 'Z') {
 		return int(r) - 48, nil
 	}
 	return 0, ErrInvalidCharacter
@@ -143,7 +143,7 @@ func CPF(cpf string) bool {
 	p1aux := int(p2[0] - '0')
 	p2aux := int(p2[1] - '0')
 
-	return byte(d1) == byte(p1aux) && byte(d2) == byte(p2aux)
+	return d1 == p1aux && d2 == p2aux
 }
 
 func CNPJ(cnpj string) bool {
@@ -179,10 +179,9 @@ func CNPJ(cnpj string) bool {
 	p1aux := int(p2[0] - '0')
 	p2aux := int(p2[1] - '0')
 
-	return byte(d1) == byte(p1aux) && byte(d2) == byte(p2aux)
+	return d1 == p1aux && d2 == p2aux
 }
 
-// CNPJAlphanumeric is a experimental function to validate CNPJ with alphanumeric characters use with caution.
 func CNPJAlphanumeric(cnpj string) bool {
 	cnpj = RemoveNonAlphaNum(cnpj)
 	if len(cnpj) != 14 {
@@ -206,22 +205,16 @@ func CNPJAlphanumeric(cnpj string) bool {
 	if err != nil {
 		return false
 	}
-	if s < 0 {
-		return false
-	}
 	r1 := s % 11
 	d1 := 0
 	if r1 >= 2 {
 		d1 = 11 - r1
 	}
 
-	p1ComDV := p1 + strconv.Itoa(d1)
+	p1WithDV := p1 + strconv.Itoa(d1)
 
-	s2, err := sumAlpha(p1ComDV, cnpjP2)
+	s2, err := sumAlpha(p1WithDV, cnpjP2)
 	if err != nil {
-		return false
-	}
-	if s2 < 0 {
 		return false
 	}
 	r2 := s2 % 11
@@ -248,7 +241,7 @@ func PixKeyType(pixkey string) ([]string, error) {
 	if IsEmailValid(pixkey) {
 		types["EMAIL"] = true
 	}
-	if IsCNPJ(pixkey) && CNPJ(pixkey) {
+	if IsCNPJAlpha(pixkey) && CNPJAlphanumeric(pixkey) {
 		types["CNPJ"] = true
 	}
 	if IsCPF(pixkey) && CPF(pixkey) {

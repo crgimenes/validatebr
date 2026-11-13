@@ -1,9 +1,12 @@
 package main
 
-import "fmt"
+import (
+	"flag"
+	"fmt"
+	"os"
+)
 
 var (
-	// invalid DDD codes (true is invalid)
 	invalidDDD = [100]bool{
 		true,  // "00",
 		true,  // "01",
@@ -111,19 +114,33 @@ var (
 func generateBitmasks(invalid [100]bool) (uint64, uint64) {
 	var mask1, mask2 uint64
 	for i, val := range invalid {
-		if val {
-			if i < 64 {
-				mask1 |= 1 << i
-			} else if i < 128 {
-				mask2 |= 1 << (i - 64)
-			}
+		if !val {
+			continue
 		}
+		if i < 64 {
+			mask1 |= 1 << i
+			continue
+		}
+		mask2 |= 1 << (i - 64)
 	}
 	return mask1, mask2
 }
 
 func main() {
-	var mask1, mask2 = generateBitmasks(invalidDDD)
+	flag.CommandLine.SetOutput(os.Stdout)
+	flag.Usage = func() {
+		fmt.Println(`usage: processDDDMask
+
+Print the IsValidDDD bitmask constants for phone.go from the invalidDDD table.
+
+Output: a Go const block on stdout.
+
+Example:
+  go run ./processDDDMask`)
+	}
+	flag.Parse()
+
+	mask1, mask2 := generateBitmasks(invalidDDD)
 
 	fmt.Println("const (")
 	fmt.Printf("\tinvalidDDDBitmask1 = 0b%064b\n", mask1)
